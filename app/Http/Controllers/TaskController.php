@@ -12,16 +12,44 @@ class TaskController extends Controller
      */
     public function index()
     {
-        $tasks = Task::latest()->get();
+        $tasks = Task::orderBy('id', 'asc')->get();
 
         return view('tasks.index', compact('tasks'));
     }
+
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-          return view('tasks.create');
+        return view('tasks.create');
+    }
+
+    /**
+     * Shared validation rules for Create and Edit.
+     */
+    private function validateTask(Request $request)
+    {
+        return $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|max:2000',
+            'due_date' => 'required|date',
+            'status' => 'required|in:pending,completed',
+        ], [
+            'title.required' => 'Task title is required.',
+            'title.string' => 'Task title must be text.',
+            'title.max' => 'Task title must not exceed 255 characters.',
+
+            'description.required' => 'Description is required.',
+            'description.string' => 'Description must be text.',
+            'description.max' => 'Description must not exceed 2000 characters.',
+
+            'due_date.date' => 'Please enter a valid due date.',
+            'due_date.required' => 'Please select a due date.',
+
+            'status.required' => 'Please select a task status.',
+            'status.in' => 'Please select a valid task status.',
+        ]);
     }
 
     /**
@@ -29,13 +57,9 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'due_date' => 'nullable|date',
-         ]);
+        $validated = $this->validateTask($request);
 
-          Task::create($validated);
+        Task::create($validated);
 
         return redirect()
             ->route('tasks.index')
@@ -63,12 +87,7 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
-         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'due_date' => 'nullable|date',
-            'status' => 'required|in:pending,completed',
-        ]);
+        $validated = $this->validateTask($request);
 
         $task->update($validated);
 
