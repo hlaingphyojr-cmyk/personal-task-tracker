@@ -48,7 +48,7 @@
                 <tbody>
                     @forelse ($tasks as $task)
                         <tr>
-                            <td>{{ $task->id }}</td>
+                            <td>{{ $loop->iteration }}</td>
 
                             <td>{{ $task->title }}</td>
 
